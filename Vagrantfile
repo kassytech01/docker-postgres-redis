@@ -2,16 +2,26 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
+  config.ssh.insert_key = false
   config.vm.box = "coreos-alpha"
   config.vm.box_check_update = false
   config.vm.box_url = ["https://storage.googleapis.com/alpha.release.core-os.net/amd64-usr/current/coreos_production_vagrant.json"]
 
-  config.vm.network "private_network", ip: "192.168.33.11"
-  config.vm.synced_folder "./docker", "/tmp/docker", type: "nfs"
-  config.vm.network "forwarded_port", guest: 5432, host: 5431
-
   config.vm.provider "virtualbox" do |vb|
-    vb.memory = "1024"
+    vb.check_guest_additions = false
+    vb.functional_vboxsf     = false
+    vb.memory = "512"
+    vb.cpus = 1
+  end
+
+  # config.vm.synced_folder "./docker", "/tmp/docker", type: "nfs", :mount_options => ["nolock,vers=3,udp"]
+  config.vm.synced_folder "./docker", "/tmp/docker", type: "nfs"
+
+  config.vm.network "private_network", ip: "192.168.33.11"
+  config.vm.network "forwarded_port", guest: 5432, host: 5432
+
+  if Vagrant.has_plugin?("vagrant-vbguest") then
+      config.vbguest.auto_update = false
   end
 
   # install docker-compose
