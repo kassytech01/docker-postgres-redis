@@ -23,7 +23,6 @@
 ### Run
 
 ```
-$ cd ./docker-postgres-redis
 $ vagrant up
 ```
 
@@ -92,7 +91,6 @@ $ vagrant -h
 ### Run
 
 ```
-$ cd ./docker-postgres-redis/docker
 $ docker-compose -f ./docker/docker-compose.yml up -d
 ```
 
