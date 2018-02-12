@@ -226,9 +226,9 @@ $
 $ vagrant ssh
 
 # CoreOS login
-$ cd ./docker
-$ ls
-
+$ cd /tmp/docker
+$ ls docker-compose.yml
+docker-compose.yml
 $ docker-compose logs
 ```
 
