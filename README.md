@@ -2,49 +2,193 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-ローカル環境に「PostgreSQL+Redis」をコマンド1発で構築します。
-
-## Description
-
-`docker-compose`を使用して環境を構築します。環境構築の方法は、以下の2通りから選択してください。
-
-1. Vagrant＋docker-compose
-2. docker-compose
-
-ローカル環境の構築にdockerを使用することで、環境の更新（データベースの破棄と構築）を素早く行うことができるようになります。
+ローカル環境に「PostgreSQL+Redis」をコマンド1発で構築します。環境の更新（データベースの切り替え）を素早く行うためにdockerを使用します。
 
 ## Installed Version
 
 - PostgreSQL - 9.6.6
-- Redis XXXXXXXXXXXXXXXXXXXXXXXX
+- Redis - 3.2.100
 
-## Usage
+## Description
 
-### **1\. Vagrant＋docker-compose環境**
+環境構築の方法は、以下の2通りから選択してください。
+
+1. Vagrant＋docker-compose
+2. docker-compose
+
+## Usage - [1\. Vagrant＋docker-compose]
+
+以下は、Windows環境を前提に説明します。
+
+### Run
+
+```
+$ cd ./docker-postgres-redis
+$ vagrant up
+```
+
+dockerが標準インストールされている軽量Linuxの`CoreOS`に`docker-compose`をインストールして、PostgreSQLとRedisのDockerコンテナが自動起動するようになっています。
+
+### Preparation
+
+実行にはVagrantのインストールが必要です。
+
+#### VirtualBoxをインストール
+
+VirtualBoxをダウンロードして、インストールします。
+
+- VirtualBox - <http://www.oracle.com/technetwork/server-storage/virtualbox/downloads/index.html?ssSourceSiteId=otnjp>
+
+#### Vagrantのインストール
+
+Vagrantをダウンロードして、インストールします。
+
+- Vagrant - <https://www.vagrantup.com/downloads.html>
+
+#### Vagrant WinNFSdのインストール
+
+synced_folderにnfsを使用しているので、Windowsは[Vagrant WinNFSd](https://github.com/winnfsd/vagrant-winnfsd)をインストールしてください。
+
+```
+$ vagrant plugin install vagrant-winnfsd
+```
+
+### Command Tips
+
+仮想マシンを起動します。
 
 ```
 $ vagrant up
 ```
 
-dockerが標準インストールされている軽量Linuxの`CoreOS`を使用します。CoreOSに`docker-compose`をインストールして、PostgreSQLとRedisのDockerコンテナが自動起動するようになっています。
-
-**Note:** 実行には[Vagrantのインストール](#Installation)が必要です。
-
-### **2\. docker-compose環境**
+仮想マシンを停止します。
 
 ```
+$ vagrant halt
+```
+
+仮想マシンにログインします。
+
+```
+$ vagrant ssh
+```
+
+仮想マシンを破棄します。
+
+```
+$ vagrant destroy
+```
+
+ヘルプを表示します。
+
+```
+$ vagrant -h
+```
+
+## Usage - [2\. docker-compose]
+
+以下は、Ubuntu環境を前提に説明します。
+
+### Run
+
+```
+$ cd ./docker-postgres-redis/docker
 $ docker-compose -f ./docker/docker-compose.yml up -d
 ```
 
 PostgreSQLとRedisのDockerコンテナが自動起動するようになっています。
 
-**Note:** 実行にはdocker-composeのインストールが必要です。
+### Preparation
 
-### 実行時の動作
+実行にはdockerとdocker-composeのインストールが必要です。
+
+#### Docker CEのインストール
+
+Dockerの公式サイトを参照して、インストールします。
+
+- Get Docker CE for Ubuntu - https://docs.docker.com/install/linux/docker-ce/ubuntu/
+
+```
+# Dockerのインストールに必要なパッケージをインストール
+$ sudo apt-get update
+$ sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    software-properties-common
+
+# GPGキーを追加
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+# Dockerリポジトリを追加
+$ sudo add-apt-repository \
+       "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+       $(lsb_release -cs) \
+       stable"
+
+# Docker CEをインストール
+$ sudo apt-get update
+$ sudo apt-get install docker-ce
+
+# インストール確認
+$ docker -v
+Docker version 1.13.1, build ...
+```
+
+sudoなしで、dockerコマンドが実行できるように以下を実行します。
+
+```
+$ sudo usermod -aG docker $(whoami)
+```
+
+#### Docker Composeのインストール
+
+```
+$ sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+$ sudo chmod +x /usr/local/bin/docker-compose
+
+# 確認
+$ docker-compose --version
+docker-compose version 1.19.0, build ...
+```
+
+### Command Tips
+
+dockerを起動します（-d:バックグラウンド）。初回起動時のみビルドを実行します。
+
+```
+$ docker-compose -f ./docker/docker-compose.yml up -d
+```
+
+dockerを起動します（-d:バックグラウンド／--build：リビルド）
+
+```
+$ docker-compose -f ./docker/docker-compose.yml up -d --build
+```
+
+dockerを停止します（コンテナとネットワークも削除します）。
+
+```
+$ docker-compose down
+```
+
+コンテナの一覧を表示します。
+
+```
+$ docker-compose ps
+```
+
+## Detail
+
+### 実行時の動作について
+
+- データベースの初期化（initdb）
 
 ### 接続情報
 
-- PostgreSQLの接続情報
+ポートフォワーディングにて接続します。
+
+**PostgreSQLの接続情報:**
 
 Property | Value
 :------- | :--------
@@ -54,39 +198,51 @@ User     | postgres
 Password | postgres
 Database | postgres
 
-### Installation
+**Redisの接続情報**
 
-#### Vagrant
+Property | Value
+:------- | :--------
+HostName | localhost
+Port     |
+User     |
+Password |
+Database |
 
-Vagrantをダウンロードして、インストールを実施します。
+## Commands
 
-- Vagrant - <https://www.vagrantup.com/downloads.html>
-
-synced_folderにnfsを使用しているので、Windowsは[Vagrant WinNFSd](https://github.com/winnfsd/vagrant-winnfsd)をインストールしてください。
-
-```
-$ vagrant plugin install vagrant-winnfsd
-```
-
-Vagrantを起動します。
-
-```
-$ vagrant up
-```
-
-## 各コマンド
-
-- dockerにbashログイン
+**dockerにbashログイン**
 
 ```
 $ vagrant ssh
+
+# PostgreSQL
 $ docker exec -it docker_database_1 bash
+
+# Redis
+$
 ```
 
-- pg_dump
+**docker-compose実行時ログ**
 
 ```
-$ c:\develop\nmo\PostgreSQL\9.6\bin\pg_dump -h localhost -p 5432 -U postgres -f dump postgres
+$ vagrant ssh
+
+# CoreOS login
+$ cd ./docker
+$ ls
+
+$ docker-compose logs
+```
+
+**pg_dump**
+
+```
+# pg_dump実行
+$ pg_dump -h localhost -p 5432 -U postgres -f dump postgres
+or
+$ docker exec docker_database_1 pg_dump -h localhost -p 5432 -U postgres -f dump postgres | docker cp docker_database_1:/dump /tmp/docker/
+
+# .gz化（Windowsの場合は7-Zipなどを利用）
 $ gzip dump
 ```
 
@@ -94,8 +250,24 @@ $ gzip dump
 
 動作確認した環境は以下の通りです。
 
-- Vagrant＋docker-compose環境：Windows 10
-- docker-compose：Ubuntu 16.04LTS
+### Vagrant＋docker-compose環境
+
+* OS
+  - Windows 10
+* Software
+  - VirtualBox 5.2.6
+  - Vagrant 2.0.2
+  - CoreOS alpha (1675.0.1)
+  - docker 18.01.0-ce,
+  - docker-compose 1.19.0
+
+### docker-compose環境
+
+* OS
+  - Ubuntu 16.04LTS
+* Software
+  - docker 1.13.1
+  - docker-compose 1.19.0
 
 ## Author
 

@@ -26,7 +26,7 @@ Vagrant.configure(2) do |config|
 
   # install docker-compose
   $get_compose = <<-'EOF'
-    curl -L "https://github.com/docker/compose/releases/download/1.18.0/docker-compose-$(uname -s)-$(uname -m)" >  ~/docker-compose
+    curl -L "https://github.com/docker/compose/releases/download/1.19.0/docker-compose-$(uname -s)-$(uname -m)" >  ~/docker-compose
     sudo mkdir -p /opt
     sudo mkdir -p /opt/bin
     sudo mv ~/docker-compose /opt/bin/docker-compose
