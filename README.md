@@ -2,12 +2,15 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-ローカル環境に「PostgreSQL+Redis」をコマンド1発で構築します。環境の更新（データベースの切り替え）を素早く行うためにdockerを使用します。
+ローカルに「PostgreSQL+Redis」の環境をコマンド1発で構築することを目的に用意したプロジェクトです。dockerを使用することで環境の更新（データベースの切り替え）を素早く行える状態を実現します。
+
+**補足：**  
+OSが32bitの場合、RedisのDockerfileを一部書き換える必要があります。
 
 ## Installed Version
 
 - PostgreSQL - 9.6.6
-- Redis - 3.2.100
+- Redis - 3.2.10
 
 ## Description
 
@@ -18,9 +21,11 @@
 
 ## Usage - [1\. Vagrant＋docker-compose]
 
-以下は、Windows環境を前提に説明します。
+主に、Windows環境での利用を想定しています。
 
 ### Run
+
+以下のコマンドを実行すれば、環境が立ち上がります。
 
 ```
 $ vagrant up
@@ -66,7 +71,7 @@ $ vagrant up
 $ vagrant halt
 ```
 
-仮想マシンにログインします。
+仮想マシンにsshログインします。
 
 ```
 $ vagrant ssh
@@ -86,9 +91,12 @@ $ vagrant -h
 
 ## Usage - [2\. docker-compose]
 
-以下は、Ubuntu環境を前提に説明します。
+主に、Unix系の環境での利用を想定しています。
+以下は、Ubuntuでの利用を前提に記載しています。Macの場合など、適宜読み替えてください。
 
 ### Run
+
+以下のコマンドを実行すれば、環境が立ち上がります。
 
 ```
 $ docker-compose -f ./docker/docker-compose.yml up -d

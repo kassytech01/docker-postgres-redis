@@ -2,17 +2,26 @@ version: "3"
 services:
   database:
     build: ./postgresql
-    volumes:
-      - database:/var/lib/postgresql/data
-      # 公式Docker HubのPostgreSQLは、コンテナ作成時に /docker-entrypoint-initdb.d/ の下の *.sh, *.sql, *.sql.gz　を実行します。（初回作成時のみなので注意）
-      - ./postgresql/init:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
     ports:
         - 5432:5432
+    volumes:
+      - database:/var/lib/postgresql/data
+      # 公式Docker HubのPostgreSQLは、コンテナ作成時に /docker-entrypoint-initdb.d/ の下の *.sh, *.sql, *.sql.gz　を実行します。（初回作成時のみなので注意）
+      - ./postgresql/init:/docker-entrypoint-initdb.d
+
+  redis:
+    build: ./redis
+    ports:
+      - "6379:6379"
+    volumes:
+       - redis-data:/data
 
 volumes:
     database:
       external: false
+    redis-data:
+      driver: local
