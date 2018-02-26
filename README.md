@@ -2,10 +2,10 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-ローカルに「PostgreSQL+Redis」の環境をコマンド1発で構築することを目的に用意したプロジェクトです。dockerを使用することで環境の更新（データベースの切り替え）を素早く行える状態を実現します。
+ローカルに「PostgreSQL+Redis」の環境をコマンド1発で構築することを目的に用意したプロジェクトです。dockerを使用することで環境の更新（データベースの切り替え）を素早く行えます。
 
 **補足：**  
-OSが32bitの場合、RedisのDockerfileを一部書き換える必要があります。
+※OSが32bitの場合、RedisのDockerfileを一部書き換える必要があります。
 
 ## Installed Version
 
@@ -16,8 +16,8 @@ OSが32bitの場合、RedisのDockerfileを一部書き換える必要があり�
 
 環境構築の方法は、以下の2通りから選択してください。
 
-1. Vagrant＋docker-compose
-2. docker-compose
+1. Vagrant＋docker-compose（主にWindows環境を想定）
+2. docker-compose（主にUnix系の環境を想定）
 
 ## Usage - [1\. Vagrant＋docker-compose]
 
@@ -25,29 +25,25 @@ OSが32bitの場合、RedisのDockerfileを一部書き換える必要があり�
 
 ### Run
 
-以下のコマンドを実行すれば、環境が立ち上がります。
+以下のコマンドを実行します。
 
 ```
 $ vagrant up
 ```
 
-dockerが標準インストールされている軽量Linuxの`CoreOS`に`docker-compose`をインストールして、PostgreSQLとRedisのDockerコンテナが自動起動するようになっています。
+dockerが標準インストールされている軽量Linuxの`CoreOS`に`docker-compose`がインストールされ、PostgreSQLとRedisのDockerコンテナが自動起動するようになっています。
 
 ### Preparation
 
-実行にはVagrantのインストールが必要です。
+実行にはVagrantの実行環境が必要です。
 
 #### VirtualBoxをインストール
 
-VirtualBoxをダウンロードして、インストールします。
-
-- VirtualBox - <http://www.oracle.com/technetwork/server-storage/virtualbox/downloads/index.html?ssSourceSiteId=otnjp>
+- VirtualBox - http://www.oracle.com/technetwork/server-storage/virtualbox/downloads/index.html?ssSourceSiteId=otnjp
 
 #### Vagrantのインストール
 
-Vagrantをダウンロードして、インストールします。
-
-- Vagrant - <https://www.vagrantup.com/downloads.html>
+- Vagrant - https://www.vagrantup.com/downloads.html
 
 #### Vagrant WinNFSdのインストール
 
@@ -96,7 +92,7 @@ $ vagrant -h
 
 ### Run
 
-以下のコマンドを実行すれば、環境が立ち上がります。
+以下のコマンドを実行します。
 
 ```
 $ docker-compose -f ./docker/docker-compose.yml up -d
@@ -106,7 +102,7 @@ PostgreSQLとRedisのDockerコンテナが自動起動するようになって�
 
 ### Preparation
 
-実行にはdockerとdocker-composeのインストールが必要です。
+実行にはdocker-composeの実行環境が必要です。
 
 #### Docker CEのインストール
 
@@ -188,7 +184,44 @@ $ docker-compose ps
 
 ### 実行時の動作について
 
-- データベースの初期化（initdb）
+#### データベースの初期化（initdb）
+
+Docker PostgreSQLの公式イメージは、DBを初期化する仕組みが導入されています。
+
+##### 動作の仕組み
+
+/docker-entrypoint-initdb.dに.sqlや.sh、.sql.gzを置いておけば初回起動時に実行してくれます。
+
+**公式イメージ：**
+https://hub.docker.com/_/postgres/
+
+`docker-entrypoint.sh`
+```
+for f in /docker-entrypoint-initdb.d/*; do
+    case "$f" in
+        *.sh)     echo "$0: running $f"; . "$f" ;;
+        *.sql)    echo "$0: running $f"; "${psql[@]}" -f "$f"; echo ;;
+        *.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${psql[@]}"; echo ;;
+        *)        echo "$0: ignoring $f" ;;
+    esac
+    echo
+done
+```
+
+そこで、このプロジェクトでは、./postgresql/initにデータベース初期化用の実行ファイルとデータを格納しておきます。
+
+
+```
++ docker-commpose.yml
++- postgresql/
+　+- init/
+    + 1_import_dump.sql
+    + 2_create_db.sql
+    + 3_import.sh
+    + dump.gz
+```
+
+
 
 ### 接続情報
 
@@ -209,10 +242,9 @@ Database | postgres
 Property | Value
 :------- | :--------
 HostName | localhost
-Port     |
+Port     | 6379
 User     |
 Password |
-Database |
 
 ## Commands
 
@@ -221,11 +253,11 @@ Database |
 ```
 $ vagrant ssh
 
-# PostgreSQL
+# PostgreSQLコンテナにログイン
 $ docker exec -it docker_database_1 bash
 
-# Redis
-$
+# Redisコンテナにログイン
+$ docker exec -it docker_redis_1 bash
 ```
 
 **docker-compose実行時ログ**
