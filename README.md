@@ -2,10 +2,10 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-ローカルに「PostgreSQL+Redis」の環境をコマンド1発で構築することを目的に用意したプロジェクトです。dockerを使用することで環境の更新（データベースの切り替え）を素早く行えます。
+ローカルに「PostgreSQL+Redis」の環境をコマンド1発で構築することを目的にしたプロジェクトです。dockerを使用することで環境の更新（データベースの切り替え）を素早く行えるようにします。
 
 **補足：**  
-※OSが32bitの場合、RedisのDockerfileを一部書き換える必要があります。
+※OSが32bitの場合、RedisのDockerfileを一部書き換える必要があります。（詳細はDockerfile参照）
 
 ## Installed Version
 
@@ -216,10 +216,17 @@ done
 +- postgresql/
 　+- init/
     + 1_dump.sql.gz
-    + 2_create_table.sql
-    + 3_import.sh
+    + 2_init.sql
+
+# プレフィックスに数字を指定しておけば、その順序で処理が実行されるはずです。
 ```
 
+`1_dump.sql.gz`で動作に必要な最小限のDB状態を復元し、`2_init.sql`でテストに必要なデータセットを構成（例えば、日付制御が必要な機能に影響するカラムを当日日付にするなど）することを想定しています。
+
+また、GitLab flowがうまく回る頃には、以下のような運用フローが出来上がっていることを期待します。
+
+* 機能改修と併せてDB構造を変更した場合、`1_dump.sql.gz`を再生成しfeatureブランチにpush & Merge Requestする。
+* レビューアは、ローカルにfeatureブランチをpullして環境を起動することで、動作確認に必要なDB環境を即時構築できる。
 
 
 ### 接続情報
@@ -242,8 +249,6 @@ Property | Value
 :------- | :--------
 HostName | localhost
 Port     | 6379
-User     |
-Password |
 
 ## Commands
 
