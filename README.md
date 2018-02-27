@@ -215,10 +215,9 @@ done
 + docker-commpose.yml
 +- postgresql/
 　+- init/
-    + 1_import_dump.sql
-    + 2_create_db.sql
+    + 1_dump.sql.gz
+    + 2_create_table.sql
     + 3_import.sh
-    + dump.gz
 ```
 
 
